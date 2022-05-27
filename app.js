@@ -8,6 +8,12 @@ let app=Express()
 app.use(Bodyparser.urlencoded({extended:true}))
 app.use(Bodyparser.json())
 
+app.use((req, res, next) => { 
+    res.setHeader("Access-Control-Allow-Origin", "*");  
+    res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept"   ); 
+    res.setHeader("Access-Control-Allow-Methods", "GET, POST, PATCH, DELETE, OPTIONS"   ); 
+    next(); });
+
 var studModel=Mongoose.model("students",
 new Mongoose.Schema(
     {
@@ -38,8 +44,44 @@ studdetails.save((error,data)=>
 
 })
 
+app.post("/api/deletestud",(req,res)=>{
+var getID=req.body
+studModel.findByIdAndRemove(getID,(error,data)=>{
+if(error)
+{
+    res.send({"status":"error","data":error})
+}
+else{
+    res.send({"status":"success","data":data})
+}
+})
+})
+
+
+app.post("/api/searchstud",(req,res)=>
+{
+var getAdmsn=req.body
+studModel.find(getAdmsn,(error,data)=>{
+    if(error)
+    {
+        res.send({"status":"error","data":error})
+    }
+    else{
+        res.send({"status":"success","data":data})
+    }
+})
+})
+
 app.get("/api/viewstud",(req,res)=>{
-res.send("Hello")
+studModel.find((error,data)=>{
+if(error)
+{
+res.send({"status":"error"})
+}
+else{
+res.send(data)
+}
+})
 })
 
 app.listen(7000,()=>{
